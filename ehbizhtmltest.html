@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+
+  <title>电商数据日常监控</title>
+
+    <link rel="stylesheet" href="css/style.css" media="screen" type="text/css" />
+   <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+     <script src="http://echarts.baidu.com/dist/echarts.js"></script>
+     <script type="text/javascript" src="jedate/jquery-1.7.2.js"></script>
+<script type="text/javascript" src="jedate/jquery.jedate.js"></script>
+<link type="text/css" rel="stylesheet" href="jedate/skin/jedate.css">
+
+
+
+</head>
+
+<body>
+<div style="text-align:center;clear:both;">
+</div>
+  <article class="tables">
+
+		<input checked id="one" name="tabs" type="radio"  onclick="refreshPanel1()">
+	    <label for="one">流水</label>
+
+	    <input id="two" name="tabs" type="radio"  onclick="refreshPanel2()" >
+	    <label for="two">午餐</label>
+
+        <input id="three" name="tabs" type="radio"  onclick="refreshPanel3()" >
+	    <label for="three">其他品类</label>
+
+	    <input id="four" name="tabs" type="radio"  onclick="refreshPanel4()" >
+	    <label for="four">总体用户</label>
+
+        <input id="five" name="tabs" type="radio"  onclick="refreshPanel5()" >
+	    <label for="five">新用户</label>
+
+	    <input id="six" name="tabs" type="radio" onclick="refreshPanel6()">
+	    <label for="six">优惠参与详情</label>
+
+        <input id="seven" name="tabs" type="radio" onclick="refreshPanel7()">
+	    <label for="seven">预警用户</label>
+
+	    <div class="panels">
+		        <div class="panel" style="opacity:100">
+                    <div  id="datemain" style="width:100%;height:100px;">
+
+    <p class="datep" ><input class="datainp wicon" id="inpstart" type="text" placeholder="开始日期" value=""  readonly style="opacity:100"> 至 <input class="datainp wicon" id="inpend" type="text" placeholder="结束日期"   readonly style="opacity:100">
+        <button  id="searchtime" type="button" onclick="searchtime()" >查询</button></p>
+
+</div>
+                    <div  id="main" style="position:relative;width: 100%;height:700px;"></div>
+                    <div  id="main1" style="position:relative;width: 100%;height:700px;"></div>
+                    <div  id="main2" style="position:relative;width: 100%;height:700px;"></div>
+                    <div  id="main3" ></div>
+    <script type="text/javascript">
+
+    var refreshid;
+    var start = {
+    format: 'YYYY-MM-DD ',
+    minDate: '2015-12-25', //设定最小日期
+    festival:true,
+    isinitVal:true,
+    initAddVal:[-60],
+    maxDate: $.nowDate(0), //最大日期
+    choosefun: function(elem,datas){
+
+        end.minDate = datas;
+    }
+};
+    var start = {
+    format: 'YYYY-MM-DD ',
+    minDate: '2015-12-25', //设定最小日期
+    festival:true,
+    isinitVal:true,
+    initAddVal:[-60],
+    maxDate: $.nowDate(0), //最大日期
+    choosefun: function(elem,datas){
+
+        end.minDate = datas;
+    }
+};
+var end = {
+    format: 'YYYY-MM-DD ',
+    minDate:'2015-12-25 ', //设定最小日期
+    festival:true,
+    isinitVal:true,
+    maxDate: $.nowDate(0), //最大日期
+    choosefun: function(elem,datas){
+
+        start.maxDate = datas; //将结束日的初始值设定为开始日的最大日期
+    }
+};
+ $("#inpstart").jeDate(start);
+  $("#inpend").jeDate(end);
+  var timedata={}
+
+function searchtime(){
+
+
+  timedata['starttime']=$('#inpstart').val()
+  timedata['endtime']=$('#inpend').val()
+
+$.ajax(
+{
+type: 'POST',
+url: 'http://127.0.0.1:8080/searchtime',
+
+data: timedata,
+dataType: 'json',
+success: function(data) {
+
+switch(refreshid){
+case "one":
+
+   $('#one').click();
+   break;
+case "two":
+
+   $('#two').click();
+   break;
+
+}
+
+    },
+error: function (error) {
+    alert (error);
+}
+}
+);
+
+}
+
+     $('#searchtime').click();
+     $('#one').click();
+
+        function refreshPanel1(){
+              refreshid="one"
+
+              $('#main').html('');
+               $('#main1').html('');
+               $('#main2').html('');
+               document.getElementById("main2").style.display="";
+               document.getElementById("main1").style.display="";
+               document.getElementById("main").style.display="";
+               document.getElementById("main3").style.display="none";
+
+              drawchart()
+              drawchartpower()
+            }
+           function   drawchartpower(){
+  // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('main2'));
+        myChart1.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option1 = {
+            title : {
+        text: '能量加油站流水'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:[]
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 元'
+            }
+
+        }
+    ],
+    series :[]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+          var serdata=[]
+                     $.ajax({
+      url: "http://127.0.0.1:8080/powerincome",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option1.xAxis[0].data = d.daylist;
+        option1.legend.data = d.shop;
+        for (var i=0;i<d.shop.length;i++){
+             if(i==d.shop.length-1){
+              serdata.push({ name:d.shop[i],
+            type:'line',
+            data:d.shopincome[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+
+             else{
+             serdata.push({ name:d.shop[i],
+            type:'bar',
+            data:d.shopincome[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+        }
+        option1.series = serdata;
+        myChart1.hideLoading();
+        myChart1.setOption(option1);
+
+
+      }
+    });
+
+
+    }
+         function drawchart(){
+
+         var myChart
+        // 基于准备好的dom，初始化echarts实例
+
+       myChart  = echarts.init(document.getElementById('main'));
+        myChart.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option = {
+            title : {
+        text: '左邻小站渠道流水趋势'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:['线上','线下','合计']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 元'
+            }
+
+        }
+    ],
+    series : [
+        {
+            name:'线上',
+            type:'bar',
+            data:[],
+            itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,
+        },
+        {
+            name:'线下',
+            type:'bar',
+            data:[],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,
+
+        },
+                {
+            name:'合计',
+            type:'line',
+
+            data:[],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,
+
+        }
+    ]
+        };
+        // 使用刚指定的配置项和数据显示图表。
+
+        // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('main1'));
+        myChart1.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option1 = {
+            title : {
+        text: '左邻小站站点流水趋势'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:[]
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 元'
+            }
+
+        }
+    ],
+    series :[]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+          var serdata=[]
+                     $.ajax({
+      url: "http://127.0.0.1:8080/income",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option.xAxis[0].data = d.daylist;
+        option.series[0].data=d.onlineincome
+        option.series[1].data=d.lineincome
+        option.series[2].data=d.intotal
+        myChart.hideLoading();
+        myChart.setOption(option);
+        option1.xAxis[0].data = d.daylist;
+        option1.legend.data = d.shop;
+        for (var i=0;i<d.shop.length;i++){
+             serdata.push({ name:d.shop[i],
+            type:'line',
+            data:d.shopincome[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+        option1.series = serdata;
+        myChart1.hideLoading();
+        myChart1.setOption(option1);
+        window.onresize = function(){
+myChart.resize();
+myChart1.resize();
+
+}
+
+
+      }
+    });
+}
+
+    function refreshPanel2(){
+    refreshid="two"
+             $('#main').html('');
+             $('#main1').html('');
+             $('#main2').html('');
+             document.getElementById("main2").style.display="";
+               document.getElementById("main1").style.display="";
+               document.getElementById("main").style.display="";
+               document.getElementById("main3").style.display="none";
+             drawchart1()
+             drawchart2()
+             drawchart3()
+    }
+    function   drawchart1(){
+  // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('main'));
+        myChart1.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option1 = {
+            title : {
+        text: '午餐销量趋势'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:[]
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 元'
+            }
+
+        }
+    ],
+    series :[]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+          var serdata=[]
+                     $.ajax({
+      url: "http://127.0.0.1:8080/lunch",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option1.xAxis[0].data = d.daylist;
+        option1.legend.data = d.shoplist;
+        for (var i=0;i<d.shoplist.length;i++){
+             if(i==d.shoplist.length-1){
+              serdata.push({ name:d.shoplist[i],
+            type:'line',
+            data:d.shopnumlist[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+
+             else{
+             serdata.push({ name:d.shoplist[i],
+            type:'bar',
+            data:d.shopnumlist[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+        }
+        option1.series = serdata;
+        myChart1.hideLoading();
+        myChart1.setOption(option1);
+
+
+
+      }
+    });
+
+
+    }
+     function   drawchart2(){
+
+  // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('main1'));
+        myChart1.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option1 = {
+            title : {
+        text: '午餐供应商销量趋势'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:[]
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 份'
+            }
+
+        }
+    ],
+    series :[]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+          var serdata=[]
+                     $.ajax({
+      url: "http://127.0.0.1:8080/lunchsupplier",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option1.xAxis[0].data = d.daylist;
+        option1.legend.data = d.suplist;
+        for (var i=0;i<d.suplist.length;i++){
+
+             serdata.push({ name:d.suplist[i],
+            type:'line',
+            data:d.supnumlist[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+
+        option1.series = serdata;
+        myChart1.hideLoading();
+        myChart1.setOption(option1);
+
+
+
+      }
+    });
+
+
+    }
+      function   drawchart3(){
+
+  // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('main2'));
+        myChart1.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option1 = {
+            title : {
+        text: '供应商损耗趋势'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:[]
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 份'
+            }
+
+        }
+    ],
+    series :[]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+          var serdata=[]
+                     $.ajax({
+      url: "http://127.0.0.1:8080/wastage",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option1.xAxis[0].data = d.daylist;
+        option1.legend.data = d.waslist;
+        for (var i=0;i<d.waslist.length;i++){
+
+             serdata.push({ name:d.waslist[i],
+            type:'line',
+            data:d.supwaslist[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+
+        option1.series = serdata;
+        myChart1.hideLoading();
+        myChart1.setOption(option1);
+
+
+
+      }
+    });
+
+
+    }
+
+
+      function refreshPanel3(){
+             $('#main').html('');
+             $('#main1').html('');
+             $('#main2').html('');
+             document.getElementById("main2").style.display="none";
+               document.getElementById("main1").style.display="";
+               document.getElementById("main").style.display="";
+               document.getElementById("main3").style.display="none";
+             drawchart4()
+             drawchart5()
+
+    }
+       function drawchart4(){
+         // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('main'));
+        myChart1.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option1 = {
+            title : {
+        text: 'volgo caffe 品类销量'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:[]
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 份'
+            }
+
+        }
+    ],
+    series :[]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+          var serdata=[]
+                     $.ajax({
+      url: "http://127.0.0.1:8080/catsale",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option1.xAxis[0].data = d.daylist;
+        option1.legend.data = d.catenamelist;
+        for (var i=0;i<d.catenamelist.length;i++){
+
+             serdata.push({ name:d.catenamelist[i],
+            type:'line',
+            data:d.catnumlist[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+
+        option1.series = serdata;
+        myChart1.hideLoading();
+        myChart1.setOption(option1);
+
+
+
+      }
+    });
+
+
+       }
+              function drawchart5(){
+         // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('main1'));
+        myChart1.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option1 = {
+            title : {
+        text: '工业园品类销量'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:[]
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 份'
+            }
+
+        }
+    ],
+    series :[]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+          var serdata=[]
+                     $.ajax({
+      url: "http://127.0.0.1:8080/teccatsale",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option1.xAxis[0].data = d.daylist;
+        option1.legend.data = d.catenamelist;
+        for (var i=0;i<d.catenamelist.length;i++){
+
+             serdata.push({ name:d.catenamelist[i],
+            type:'line',
+            data:d.catnumlist[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+
+        option1.series = serdata;
+        myChart1.hideLoading();
+        myChart1.setOption(option1);
+
+
+
+      }
+    });
+
+
+       }
+
+             function refreshPanel4(){
+             $('#main').html('');
+             $('#main1').html('');
+             $('#main2').html('');
+             document.getElementById("main2").style.display="";
+               document.getElementById("main1").style.display="";
+               document.getElementById("main").style.display="";
+               document.getElementById("main3").style.display="none";
+             drawchartuser()
+             drawchartonshopuser()
+             drawchartlineshopuser()
+
+    }
+            function drawchartuser(){
+               var myChart
+        // 基于准备好的dom，初始化echarts实例
+
+       myChart  = echarts.init(document.getElementById('main'));
+        myChart.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option = {
+            title : {
+        text: '渠道用户趋势'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:['线上','线下','合计']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 人'
+            }
+
+        }
+    ],
+    series : [
+        {
+            name:'线上',
+            type:'bar',
+            data:[],
+            itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,
+        },
+        {
+            name:'线下',
+            type:'bar',
+            data:[],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,
+
+        },
+                {
+            name:'合计',
+            type:'line',
+
+            data:[],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,
+
+        }
+    ]
+        };
+
+                     $.ajax({
+      url: "http://127.0.0.1:8080/user",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option.xAxis[0].data = d.daylist;
+        option.series[0].data=d.onlineuserlist
+        option.series[1].data=d.lineuserlist
+        option.series[2].data=d.totaluserlist
+        myChart.hideLoading();
+        myChart.setOption(option);}
+
+    });
+            }
+
+    function drawchartonshopuser(){
+    // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('main1'));
+        myChart1.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option1 = {
+            title : {
+        text: '站点线上用户趋势'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:[]
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 人'
+            }
+
+        }
+    ],
+    series :[]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+          var serdata=[]
+                     $.ajax({
+      url: "http://127.0.0.1:8080/onlineshopuser",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option1.xAxis[0].data = d.daylist;
+        option1.legend.data = d.shoplist;
+        for (var i=0;i<d.shoplist.length;i++){
+
+
+
+             serdata.push({ name:d.shoplist[i],
+            type:'line',
+            data:d.shopnumlist[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+
+        option1.series = serdata;
+        myChart1.hideLoading();
+        myChart1.setOption(option1);
+
+
+
+      }
+    });
+
+
+
+    }
+ function drawchartlineshopuser(){
+    // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('main2'));
+        myChart1.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option1 = {
+            title : {
+        text: '站点线下用户趋势'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:[]
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 人'
+            }
+
+        }
+    ],
+    series :[]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+          var serdata=[]
+                     $.ajax({
+      url: "http://127.0.0.1:8080/lineshopuser",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option1.xAxis[0].data = d.daylist;
+        option1.legend.data = d.shoplist;
+        for (var i=0;i<d.shoplist.length;i++){
+
+
+
+             serdata.push({ name:d.shoplist[i],
+            type:'line',
+            data:d.shopnumlist[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+
+        option1.series = serdata;
+        myChart1.hideLoading();
+        myChart1.setOption(option1);
+
+
+
+      }
+    });
+
+
+
+    }
+            function refreshPanel5(){
+             $('#main').html('');
+             $('#main1').html('');
+             $('#main2').html('');
+             document.getElementById("main2").style.display="";
+               document.getElementById("main1").style.display="";
+               document.getElementById("main").style.display="";
+               document.getElementById("main3").style.display="none";
+             drawchartnewuser()
+             drawchartonnewshopuser()
+             drawchartlinenewshopuser()
+
+    }
+            function drawchartnewuser(){
+               var myChart
+        // 基于准备好的dom，初始化echarts实例
+
+       myChart  = echarts.init(document.getElementById('main'));
+        myChart.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option = {
+            title : {
+        text: '渠道新用户趋势'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:['线上','线下','合计']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 人'
+            }
+
+        }
+    ],
+    series : [
+        {
+            name:'线上',
+            type:'bar',
+            data:[],
+            itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,
+        },
+        {
+            name:'线下',
+            type:'bar',
+            data:[],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,
+
+        },
+                {
+            name:'合计',
+            type:'line',
+
+            data:[],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,
+
+        }
+    ]
+        };
+
+                     $.ajax({
+      url: "http://127.0.0.1:8080/newuser",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option.xAxis[0].data = d.daylist;
+        option.series[0].data=d.onlineuserlist
+        option.series[1].data=d.lineuserlist
+        option.series[2].data=d.totaluserlist
+        myChart.hideLoading();
+        myChart.setOption(option);}
+
+    });
+            }
+
+    function drawchartonnewshopuser(){
+    // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('main1'));
+        myChart1.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option1 = {
+            title : {
+        text: '站点线上新用户趋势'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:[]
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 人'
+            }
+
+        }
+    ],
+    series :[]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+          var serdata=[]
+                     $.ajax({
+      url: "http://127.0.0.1:8080/onnewshopuser",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option1.xAxis[0].data = d.daylist;
+        option1.legend.data = d.shoplist;
+        for (var i=0;i<d.shoplist.length;i++){
+
+
+
+             serdata.push({ name:d.shoplist[i],
+            type:'line',
+            data:d.shopnumlist[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+
+        option1.series = serdata;
+        myChart1.hideLoading();
+        myChart1.setOption(option1);
+
+
+
+      }
+    });
+
+
+
+    }
+ function drawchartlinenewshopuser(){
+    // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('main2'));
+        myChart1.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option1 = {
+            title : {
+        text: '站点线下新用户趋势'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:[]
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 人'
+            }
+
+        }
+    ],
+    series :[]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+          var serdata=[]
+                     $.ajax({
+      url: "http://127.0.0.1:8080/linenewshopuser",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option1.xAxis[0].data = d.daylist;
+        option1.legend.data = d.shoplist;
+        for (var i=0;i<d.shoplist.length;i++){
+
+
+
+             serdata.push({ name:d.shoplist[i],
+            type:'line',
+            data:d.shopnumlist[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+
+        option1.series = serdata;
+        myChart1.hideLoading();
+        myChart1.setOption(option1);
+
+
+
+      }
+    });
+
+
+
+    }
+
+  function refreshPanel6(){
+             $('#main').html('');
+             $('#main1').html('');
+             $('#main2').html('');
+             document.getElementById("main2").style.display="";
+               document.getElementById("main1").style.display="";
+               document.getElementById("main").style.display="";
+               document.getElementById("main3").style.display="none";
+             drawchartbenefit()
+             drawchartshopdiscount()
+             drawchartshopactivity()
+
+
+
+    }
+            function drawchartbenefit(){
+               var myChart
+        // 基于准备好的dom，初始化echarts实例
+
+       myChart  = echarts.init(document.getElementById('main'));
+        myChart.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option = {
+            title : {
+        text: '每日优惠总额'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:['优惠券','平台活动','合计']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 元'
+            }
+
+        }
+    ],
+    series : [
+        {
+            name:'优惠券',
+            type:'bar',
+            data:[],
+            itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,
+        },
+        {
+            name:'平台活动',
+            type:'bar',
+            data:[],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,
+
+        },
+                {
+            name:'合计',
+            type:'line',
+
+            data:[],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,
+
+        }
+    ]
+        };
+
+                     $.ajax({
+      url: "http://127.0.0.1:8080/benefitalldata",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option.xAxis[0].data = d.daylist;
+        option.series[0].data=d.discountlist
+        option.series[1].data=d.activilist
+        option.series[2].data=d.totallist
+        myChart.hideLoading();
+        myChart.setOption(option);}
+
+    });
+            }
+
+    function drawchartshopdiscount(){
+    // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('main1'));
+        myChart1.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option1 = {
+            title : {
+        text: '优惠券使用数量'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:[]
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 单'
+            }
+
+        }
+    ],
+    series :[]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+          var serdata=[]
+                     $.ajax({
+      url: "http://127.0.0.1:8080/shopdiscount",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option1.xAxis[0].data = d.daylist;
+        option1.legend.data = d.shoplist;
+        for (var i=0;i<d.shoplist.length;i++){
+
+
+
+             serdata.push({ name:d.shoplist[i],
+            type:'line',
+            data:d.shopnumlist[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+
+        option1.series = serdata;
+        myChart1.hideLoading();
+        myChart1.setOption(option1);
+
+
+
+      }
+    });
+
+
+
+    }
+ function drawchartshopactivity(){
+    // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('main2'));
+        myChart1.showLoading({text: '正在努力的读取数据中...'  });
+        // 指定图表的配置项和数据
+        var option1 = {
+            title : {
+        text: '平台活动参与数量'
+    },
+    tooltip : {
+        trigger: 'axis'
+    },
+    legend: {
+        data:[]
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: true},
+            dataView : {show: true, readOnly: false},
+            magicType : {show: true, type: ['line', 'bar']},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    calculable : true,
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : true,
+            data : []
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            axisLabel : {
+                formatter: '{value} 单'
+            }
+
+        }
+    ],
+    series :[]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+          var serdata=[]
+                     $.ajax({
+      url: "http://127.0.0.1:8080/shopactivity",
+
+      success: function(data) {
+
+        var d = JSON.parse(data);
+
+        option1.xAxis[0].data = d.daylist;
+        option1.legend.data = d.shoplist;
+        for (var i=0;i<d.shoplist.length;i++){
+
+
+
+             serdata.push({ name:d.shoplist[i],
+            type:'line',
+            data:d.shopnumlist[i],
+
+           itemStyle:{
+                            normal:{
+                                label:{
+                                   show: true,
+                                   position: 'top',
+                                },
+                                labelLine :{show:true}
+                            }
+                        } ,})
+        }
+
+        option1.series = serdata;
+        myChart1.hideLoading();
+        myChart1.setOption(option1);
+
+
+
+      }
+    });
+
+
+
+    }
+
+      function refreshPanel7(){
+             $('#main').html('');
+             $('#main1').html('');
+             $('#main2').html('');
+             $('#tabledata').remove();
+             document.getElementById("main2").style.display="none";
+             document.getElementById("main1").style.display="none";
+             document.getElementById("main").style.display="none";
+             document.getElementById("main3").style.display="";
+             drawtable()
+    }
+      function drawtable(){
+
+       $.ajax({
+      url: "http://127.0.0.1:8080/lossuser",
+
+      success: function(data) {
+         var $tab
+
+         var d = JSON.parse(data);
+         $('#main3').append( '<table id="tabledata" ><tr><th>站点</th> <th>昵称</th><th>手机号</th><th>消费次数</th><th>消费总额</th><th>平均单价</th><th>单笔最高金额</th></tr><caption>3周内未回购的价值用户</caption></table>');
+
+          $tab = $('#tabledata');
+         for(var i=0;i<d.lossuser.length;i++) {
+         var b=i%2;
+         if(b==0){
+             $tab.append(
+                '<tr>' +
+                    '<td>' + d.lossuser[i][0] + '</td>' +
+                    '<td>' + d.lossuser[i][1] + '</td>' +
+                    '<td>' + d.lossuser[i][2] + '</td>' +
+                    '<td>' + d.lossuser[i][3] + '</td>' +
+                    '<td>' + d.lossuser[i][4] + '</td>' +
+                    '<td>' + d.lossuser[i][5] + '</td>' +
+                    '<td>' + d.lossuser[i][6] + '</td>' +
+                '</tr>'
+             );
+             }
+             else{
+             $tab.append(
+                '<tr class="alt">' +
+                    '<td>' + d.lossuser[i][0] + '</td>' +
+                    '<td>' + d.lossuser[i][1] + '</td>' +
+                    '<td>' + d.lossuser[i][2] + '</td>' +
+                    '<td>' + d.lossuser[i][3] + '</td>' +
+                    '<td>' + d.lossuser[i][4] + '</td>' +
+                    '<td>' + d.lossuser[i][5] + '</td>' +
+                    '<td>' + d.lossuser[i][6] + '</td>' +
+                '</tr>'
+             );
+             }
+         }
+
+      }
+       });
+
+       }
+
+
+    </script>
+
+
+
+
+
+
+		    </div>
+
+
+		</div>
+
+    </article>
+
+</body>
+
+</html>

@@ -1,0 +1,6 @@
+[dbconfig]
+user=root
+pwd =123456
+db_host=183.17.252.200
+db_port=13306
+db =ehdc

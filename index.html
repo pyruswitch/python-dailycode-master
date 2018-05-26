@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+
+  <title>测试</title>
+
+    <link rel="stylesheet" href="css/style.css" media="screen" type="text/css" />
+   <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+    <script src="http://echarts.baidu.com/dist/echarts.js"></script>
+	<script type="text/javascript">
+$(document).ready(function(){
+  $("#two").click(function(){
+    $("div.panel").html(
+    "<p>a</p> <p>This is  Panel Three</p>");
+
+    var d = getData();
+  });
+});
+
+function getData(){
+   var d;
+   d="a";
+
+    return d;
+}
+</script>
+</head>
+
+<body>
+<div style="text-align:center;clear:both;">
+</div>
+  <article class="tabs">
+
+		<input checked id="one" name="tabs" type="radio">
+	    <label for="one">流水</label>
+
+	    <input id="two" name="tabs" type="radio" value="Two">
+	    <label for="two">销量</label>
+
+	    <input id="three" name="tabs" type="radio">
+	    <label for="three">用户</label>
+
+	    <input id="four" name="tabs" type="radio">
+	    <label for="four">优惠</label>
+
+	    <div class="panels">
+
+		    <div class="panel" style="opacity:100">
+
+
+
+
+
+
+		    </div>
+
+
+		</div>
+
+    </article>
+
+</body>
+
+</html>

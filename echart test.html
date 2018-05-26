@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <!-- 引入 echarts.js -->
+    <script src="http://echarts.baidu.com/dist/echarts.js"></script>
+    <script type="text/javascript" src="jedate/jquery-1.7.2.js"></script>
+<script type="text/javascript" src="jedate/jquery.jedate.js"></script>
+<link type="text/css" rel="stylesheet" href="jedate/skin/jedate.css">
+    <style>
+
+.datainp{ width:130px; height:30px; border:1px #A5D2EC solid;padding-left:15px}
+.datep{ margin-bottom:40px; line-height:24px; margin-right:15px;margin-left:150px;}
+.wicon{background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAQCAYAAADj5tSrAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABZ0RVh0Q3JlYXRpb24gVGltZQAwNi8xNS8xNGnF/oAAAAAcdEVYdFNvZnR3YXJlAEFkb2JlIEZpcmV3b3JrcyBDUzVxteM2AAAAoElEQVQ4jWPceOnNfwYqAz9dYRQ+E7UtwAaGjyUsDAyYYUgJ2HT5LXZLcEmSCnA6duOlN///////H0bDALl8dPH/////Z8FuNW6Qtvw2nL3lyjsGBgYGhlmRqnj1kGwJuqHIlhJlCXq8EOITEsdqCXLEbbr8FisfFkTo+vBZRFZwERNEFFkCiw90nxJtCalxQmzegltCzVyP1RJq5HZ8AABuNZr0628DMwAAAABJRU5ErkJggg=="); background-repeat:no-repeat; background-position:right center;}
+</style>
+</head>
+<body>
+
+<div style="width:100%;height:100px;">
+
+    <p class="datep"><input class="datainp wicon" id="inpstart" type="text" placeholder="开始日期" value=""  readonly> 至 <input class="datainp wicon" id="inpend" type="text" placeholder="结束日期"   readonly></p>
+</div>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 700px;height:500px;"></div>
+    <script type="text/javascript">
+
+function drawchart(){
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+
+        // 指定图表的配置项和数据
+        var option = {
+            title: {
+                text: 'ECharts '
+            },
+            tooltip: {},
+            legend: {
+                data:['销量']
+            },
+            xAxis: {
+                data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+            },
+            yAxis: {},
+            series: [{
+                name: '销量',
+                type: 'bar',
+                data: [5, 20, 36, 10, 10, 20]
+            }]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+
+}
+drawchart()
+        var start = {
+    format: 'YYYY-MM-DD ',
+    minDate: '2015-12-25', //设定最小日期为当前日期
+    festival:true,
+    isinitVal:true,
+    initAddVal:[-60],
+    maxDate: $.nowDate(0), //最大日期
+    choosefun: function(elem,datas){
+         drawchart();
+        end.minDate = datas;
+    }
+};
+var end = {
+    format: 'YYYY-MM-DD ',
+    minDate:'2015-12-25 ', //设定最小日期为当前日期
+    festival:true,
+    isinitVal:true,
+    maxDate: $.nowDate(0), //最大日期
+    choosefun: function(elem,datas){
+       drawchart()
+        start.maxDate = datas; //将结束日的初始值设定为开始日的最大日期
+    }
+};
+$("#inpstart").jeDate(start);
+$("#inpend").jeDate(end);
+
+    </script>
+</body>
+</html>
